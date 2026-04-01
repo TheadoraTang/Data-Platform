@@ -1,7 +1,7 @@
 # traffic（交通数据中台）
 
 前端：Vue 3 + Vite + 高德地图 JS API  
-后端：FastAPI + PostgreSQL（你本地 docker 容器暴露 `5432`）
+后端：FastAPI + PostgreSQL（本地 docker 容器暴露 `5432`）
 
 ## 1) 启动数据库（你已有）
 
@@ -10,8 +10,9 @@ docker run -d -p 5432:5432 trajdb-image
 ```
 
 ## 2) 配置后端数据库连接
+docker链接 密码后续可能修改
 
-在 `backend/` 下新建 `backend/.env`（参考 `backend/.env.example`）：
+在 `backend/` 下新建 `backend/.env`
 
 ```dotenv
 DATABASE_URL=postgresql+asyncpg://postgres:tangxiaohui0722@localhost:5432/trajdb
