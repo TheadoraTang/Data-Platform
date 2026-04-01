@@ -1,0 +1,28 @@
+{
+  "name": "traffic",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "api": ".\\.venv\\Scripts\\python -m uvicorn backend.app.main:app --reload --port 8000",
+    "dev": "concurrently -k \"vite --port 8081\" \"npm run api\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.12.2",
+    "coordtransform": "^2.1.2",
+    "echarts": "^5.6.0",
+    "vue": "^3.5.30",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.4",
+    "concurrently": "^9.2.1",
+    "vite": "^7.3.1",
+    "vite-plugin-vue-devtools": "^8.0.7"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

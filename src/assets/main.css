@@ -1,0 +1,9 @@
+@import './base.css';
+
+#app {
+  height: 100vh;
+}
+
+a {
+  color: inherit;
+}
