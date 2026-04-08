@@ -9,6 +9,8 @@
         <SearchSelect
           v-model="deviceId"
           :fetch-options="fetchDeviceSuggestions"
+          :min-chars="1"
+          :max-items="200"
           placeholder="选择或输入 device_id，例如 100032066"
         />
         <button class="btn" :disabled="!deviceId || loading" @click="loadCar">查询</button>
@@ -32,7 +34,6 @@
           <div class="kv"><span>车辆ID</span><b>{{ car.device_id }}</b></div>
           <div class="kv"><span>总轨迹数</span><b>{{ car.trips_total }}</b></div>
           <div class="kv"><span>累计里程(km)</span><b>{{ fmt(car.total_distance) }}</b></div>
-<!--          <div class="kv"><span>行程数量</span><b>{{ car.trip_ids?.length ?? 0 }}</b></div>-->
         </div>
         <div v-else class="muted">暂无数据。请先查询一个 device_id。</div>
       </div>
@@ -172,8 +173,10 @@ async function loadCar() {
 }
 
 async function fetchDeviceSuggestions(keyword = '') {
+  const trimmed = String(keyword || '').trim()
+  if (!trimmed) return []
   const resp = await api.get('/api/meta/device-ids', {
-    params: { q: keyword || '' },
+    params: { q: trimmed, limit: 200 },
   })
   return resp.data || []
 }

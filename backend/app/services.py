@@ -225,6 +225,8 @@ async def fetch_car_trips(db: AsyncSession, device_id: str, limit: int = 200) ->
 
 
 async def search_trip_ids(db: AsyncSession, q: str = "", limit: int | None = None) -> list[int]:
+    if limit is None:
+        limit = 200
     if q.strip():
         sql = """
             SELECT DISTINCT trip_id
@@ -252,6 +254,8 @@ async def search_trip_ids(db: AsyncSession, q: str = "", limit: int | None = Non
 
 
 async def search_device_ids(db: AsyncSession, q: str = "", limit: int | None = None) -> list[str]:
+    if limit is None:
+        limit = 200
     if q.strip():
         sql = """
             SELECT device_id
@@ -276,4 +280,3 @@ async def search_device_ids(db: AsyncSession, q: str = "", limit: int | None = N
             params["limit"] = limit
         rows = (await db.execute(text(sql), params)).all()
     return [str(r[0]) for r in rows]
-

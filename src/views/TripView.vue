@@ -9,6 +9,8 @@
         <SearchSelect
           v-model="tripId"
           :fetch-options="fetchTripSuggestions"
+          :min-chars="1"
+          :max-items="200"
           placeholder="选择或输入 trip_id，例如 286254"
         />
         <button class="btn" :disabled="!tripId || loading" @click="loadTrip">查询</button>
@@ -98,8 +100,10 @@ async function loadTrip() {
 }
 
 async function fetchTripSuggestions(keyword = '') {
+  const trimmed = String(keyword || '').trim()
+  if (!trimmed) return []
   const resp = await api.get('/api/meta/trip-ids', {
-    params: { q: keyword || '' },
+    params: { q: trimmed, limit: 200 },
   })
   return resp.data || []
 }
