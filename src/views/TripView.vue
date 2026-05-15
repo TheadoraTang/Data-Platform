@@ -8,13 +8,14 @@
 
       <div class="controls">
         <SearchSelect
-          v-model="tripId"
-          :fetch-options="fetchTripSuggestions"
-          :min-chars="1"
-          :max-items="200"
-          placeholder="选择或输入 trip_id，例如 286254"
+            v-model="tripId"
+            :fetch-options="fetchTripSuggestions"
+            :min-chars="1"
+            :max-items="200"
+            placeholder="选择或输入 trip_id，例如 286254"
         />
         <button class="btn" :disabled="!tripId || loading" @click="submitTrip">查询</button>
+        <button class="btn" :disabled="!trip || loading" @click="exportTrip">导出数据</button>
         <label class="label">
           拥堵阈值 (km/h)
           <input v-model.number="congestionKph" type="number" class="input small" min="0" max="200" />
@@ -52,7 +53,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { api } from '@/lib/api'
+import { api, downloadJson } from '@/lib/api'
 import SearchSelect from '@/components/SearchSelect.vue'
 import AmapTripMap from '@/components/AmapTripMap.vue'
 
@@ -79,6 +80,27 @@ function fmtDuration(sec) {
   const mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0')
   const ss = String(s % 60).padStart(2, '0')
   return `${hh}:${mm}:${ss}`
+}
+
+function safeSlug(value) {
+  return String(value || '').trim().replace(/[^\w-]+/g, '_') || 'unknown'
+}
+
+function exportTrip() {
+  if (!trip.value) {
+    error.value = '暂无可导出的行程数据'
+    return
+  }
+  const now = new Date()
+  const stamp = now.toISOString().replace(/[:.]/g, '').slice(0, 15)
+  const filename = `trip_${safeSlug(tripId.value)}_${stamp}.json`
+  const payload = {
+    trip: trip.value,
+    segments: segments.value,
+    congestion_kph: congestionKph.value,
+    exported_at: now.toISOString(),
+  }
+  downloadJson(filename, payload)
 }
 
 async function loadTrip() {
@@ -137,12 +159,12 @@ onMounted(() => {
 })
 
 watch(
-  () => route.query?.id,
-  (qid) => {
-    if (!qid) return
-    tripId.value = String(qid)
-    loadTrip()
-  }
+    () => route.query?.id,
+    (qid) => {
+      if (!qid) return
+      tripId.value = String(qid)
+      loadTrip()
+    }
 )
 </script>
 
