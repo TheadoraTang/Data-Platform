@@ -10,13 +10,14 @@
 
       <div class="controls">
         <SearchSelect
-          v-model="deviceId"
-          :fetch-options="fetchDeviceSuggestions"
-          :min-chars="1"
-          :max-items="200"
-          placeholder="选择或输入 device_id，例如 100032066"
+            v-model="deviceId"
+            :fetch-options="fetchDeviceSuggestions"
+            :min-chars="1"
+            :max-items="200"
+            placeholder="选择或输入 device_id，例如 100032066"
         />
         <button class="btn" :disabled="!deviceId || loading" @click="submitCar">查询画像</button>
+        <button class="btn" :disabled="!portrait || loading" @click="exportCar">导出数据</button>
       </div>
     </div>
 
@@ -34,16 +35,16 @@
         <p class="hero-desc">
           {{
             summary
-              ? '基于当前车辆全部可用行程自动聚合，突出营运习惯、出车节奏和常驻经营区域。'
-              : '画像卡片会在查询成功后展示当前车辆的运营模式、工作节奏和区域活跃特征。'
+                ? '基于当前车辆全部可用行程自动聚合，突出营运习惯、出车节奏和常驻经营区域。'
+                : '画像卡片会在查询成功后展示当前车辆的运营模式、工作节奏和区域活跃特征。'
           }}
         </p>
       </div>
 
       <div
-        v-for="item in summaryCards"
-        :key="item.label"
-        class="stat-card"
+          v-for="item in summaryCards"
+          :key="item.label"
+          class="stat-card"
       >
         <div class="stat-label">{{ item.label }}</div>
         <div class="stat-value">{{ item.value }}</div>
@@ -94,9 +95,9 @@
 
         <div v-if="routeClusters.length" class="cluster-list">
           <div
-            v-for="(cluster, index) in routeClusters"
-            :key="cluster.cluster_key"
-            class="cluster-item"
+              v-for="(cluster, index) in routeClusters"
+              :key="cluster.cluster_key"
+              class="cluster-item"
           >
             <div class="cluster-rank">OD-{{ String(index + 1).padStart(2, '0') }}</div>
             <div class="cluster-main">
@@ -127,9 +128,9 @@
         </div>
         <div class="legend-list">
           <span
-            v-for="item in operationLegend"
-            :key="item.code"
-            class="legend-item"
+              v-for="item in operationLegend"
+              :key="item.code"
+              class="legend-item"
           >
             <span class="legend-dot" :style="{ backgroundColor: item.color }"></span>
             <span>{{ item.label }}</span>
@@ -177,7 +178,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 
-import { api } from '@/lib/api'
+import { api, downloadJson } from '@/lib/api'
 import SearchSelect from '@/components/SearchSelect.vue'
 
 const router = useRouter()
@@ -300,6 +301,27 @@ function fmtDurationSeconds(sec) {
   const mm = String(Math.floor((total % 3600) / 60)).padStart(2, '0')
   const ss = String(total % 60).padStart(2, '0')
   return `${hh}:${mm}:${ss}`
+}
+
+function safeSlug(value) {
+  return String(value || '').trim().replace(/[^\w-]+/g, '_') || 'unknown'
+}
+
+function exportCar() {
+  if (!portrait.value) {
+    error.value = '暂无可导出的车辆运营数据'
+    return
+  }
+  const now = new Date()
+  const stamp = now.toISOString().replace(/[:.]/g, '').slice(0, 15)
+  const filename = `car_${safeSlug(deviceId.value)}_${stamp}.json`
+  const payload = {
+    device_id: deviceId.value,
+    portrait: portrait.value,
+    trips: trips.value,
+    exported_at: now.toISOString(),
+  }
+  downloadJson(filename, payload)
 }
 
 function formatHour(value) {
@@ -634,12 +656,12 @@ onMounted(() => {
 })
 
 watch(
-  () => route.query?.id,
-  (qid) => {
-    if (!qid) return
-    deviceId.value = String(qid)
-    loadCar()
-  }
+    () => route.query?.id,
+    (qid) => {
+      if (!qid) return
+      deviceId.value = String(qid)
+      loadCar()
+    }
 )
 
 onBeforeUnmount(() => {
